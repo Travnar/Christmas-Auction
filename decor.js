@@ -14,6 +14,7 @@ if (!IN_DEVELOPMENT) document.documentElement.classList.add('dev-off');
 (function(){
   var c=document.getElementById('snow'); if(!c) return;
   if(document.body.hasAttribute('data-calm')){ c.remove(); return; }
+  var rootEl=document.documentElement;
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ c.remove(); return; }
   var ctx=c.getContext('2d'), w=0, h=0, flakes=[], i, glyphs=['\u2744','\u2745','\u2746','\u2022'];
   function size(){ w=c.width=window.innerWidth; h=c.height=window.innerHeight; }
@@ -21,9 +22,11 @@ if (!IN_DEVELOPMENT) document.documentElement.classList.add('dev-off');
   for(i=0;i<55;i++){ flakes.push({x:Math.random()*w,y:Math.random()*h,r:10+Math.random()*16,s:.5+Math.random()*1.3,d:Math.random()*6.28,g:glyphs[i%glyphs.length]}); }
   function tick(){
     ctx.clearRect(0,0,w,h);
+    var calm=rootEl.classList.contains('minimal');
     for(var k=0;k<flakes.length;k++){
       var f=flakes[k]; f.y+=f.s; f.d+=.012; f.x+=Math.sin(f.d)*.7;
       if(f.y>h+20){ f.y=-20; f.x=Math.random()*w; }
+      if(calm){ ctx.fillStyle='rgba(255,255,255,.85)'; ctx.beginPath(); ctx.arc(f.x,f.y,f.r/6,0,6.283); ctx.fill(); continue; }
       ctx.font=f.r+'px sans-serif'; ctx.fillStyle='rgba(255,255,255,.95)'; ctx.strokeStyle='rgba(60,120,200,.55)'; ctx.lineWidth=1;
       ctx.strokeText(f.g,f.x,f.y); ctx.fillText(f.g,f.x,f.y);
     }
@@ -38,6 +41,7 @@ if (!IN_DEVELOPMENT) document.documentElement.classList.add('dev-off');
   if(window.matchMedia && (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !window.matchMedia('(pointer: fine)').matches)) return;
   var last=0, cols=['#ffd400','#ff2a2a','#2aff6a','#2a8bff','#ff6bd6'];
   document.addEventListener('pointermove',function(e){
+    if(document.documentElement.classList.contains('minimal')) return;
     var t=Date.now(); if(t-last<45) return; last=t;
     var s=document.createElement('span'); s.className='spark'; s.textContent='\u2726';
     s.style.left=e.clientX+'px'; s.style.top=e.clientY+'px'; s.style.color=cols[Math.floor(Math.random()*cols.length)];
