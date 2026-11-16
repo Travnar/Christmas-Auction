@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Christmas Auction</title>
+<meta name="description" content="Rules for our Christmas Auction.">
+<link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<div class="lights" id="lights" aria-hidden="true"></div>
+<div class="marquee"><span id="marqueeText">&#9733; WELCOME TO THE CHRISTMAS AUCTION &#9733;</span></div>
+
+<header>
+  <div class="hero">
+    <img src="media/images/tree_art.png" alt="Decorated Christmas tree with presents">
+    <div class="mid">
+      <h1 class="wordart">Christmas Auction</h1>
+    </div>
+    <img src="media/images/tree_art.png" alt="Decorated Christmas tree with presents">
+  </div>
+</header>
+
+<main>
+  <section id="gifts">
+    <h2>Gifts</h2>
+    <table>
+      <tbody>
+        <tr><td>Your group decides how much they want the limit to be for the auction per player.</td></tr>
+        <tr><td>You can bring any amount of gifts, as long as they add up to the decided limit. For example, a group decides on a $20 limit per player. That means player A can bring a single $20 gift, player B can bring 4x $5 gifts and player C can bring a $10 gift, a $5 gift, a $3 gift and two $1 gifts.</td></tr>
+        <tr><td>It&rsquo;s encouraged for players to bring some exposed gifts and some hidden gifts. Otherwise, the host can add additional hidden gifts to add risk to the auction. The hidden gifts could be very valuable, or White Elephants.</td></tr>
+        <tr><td>Small gifts, such as candy, can be added at the end as a money sink for players who still have leftover auction money.</td></tr>
+        <tr><td>What&rsquo;s in hidden gifts should not be shared with anyone else.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="auctioning">
+    <h2>Auctioning</h2>
+    <table>
+      <tbody>
+        <tr><td>All players start with the same amount of auction money and then can earn additional money from mini-games throughout the party.</td></tr>
+        <tr><td>Gifts are drawn at random.</td></tr>
+        <tr><td>Bids are called out by whole dollars and raise by at least $1. Going once, twice, sold.</td></tr>
+        <tr><td>The auctioneer can participate during the auction while auctioning, or designate another player to bid for them.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="advantages">
+    <h2><span class="new">NEW!</span>Advantages</h2>
+    <table>
+      <tbody>
+        <tr><td>Advantages provide benefits to players throughout the auction and can be purchased during the auction or found hidden throughout the party.</td></tr>
+        <tr><td>Hosts can decide to hide some advantages during the auction process by putting the advantage&rsquo;s effect in an envelope.</td></tr>
+        <tr><td>Advantages can include the following effects: double your bid, steal a gift from another player, protect your gift from steals, block a single player during an auction round, steal money from all players&rsquo; pools.</td></tr>
+        <tr><td><a href="advantages.html">Read More</a></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="games">
+    <h2><span class="new">NEW!</span>Games</h2>
+    <table>
+      <tbody>
+        <tr><td>During the party, players can earn additional auction money by winning games. Below are some examples.</td></tr>
+        <tr><td>The Saran Wrap Ball game can add different amounts of auction money per layer, as well as advantages.</td></tr>
+        <tr><td>Scoring correctly during Christmas Trivia between auction rounds can win players additional auction money.</td></tr>
+        <tr><td>Winning rounds of games, such as Cards Against Humanity, can also score players additional auction money.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <p class="center" data-dev-only>
+    <a class="btn" href="play.html">Join a game</a>
+    <a class="btn alt" href="host.html">Host a party</a>
+  </p>
+  <section class="backbar">
+    <h2><a href="index.html">Back</a></h2>
+  </section>
+</main>
+
+<footer>
+  <p>Merry Christmas!</p>
+</footer>
+
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+<script src="decor.js?v=9"></script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Host: Christmas Auction</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="style.css?v=5">
+</head>
+<body data-calm>
+<canvas id="snow" aria-hidden="true"></canvas>
+<div class="lights" id="lights" aria-hidden="true"></div>
+
+<main>
+  <p class="center small"><a href="index.html">Home</a> &middot; <a href="rules.html">Rules</a></p>
+  <h1 class="wordart" style="text-align:center;margin:14px 0 26px">Host Control Room</h1>
+
+  <div class="card err" id="fatal" hidden></div>
+
+  <section id="setup">
+    <h2>Start a party</h2>
+    <div class="formrow"><button type="button" id="createBtn">Create a new room</button></div>
+    <div class="formrow">
+      <label for="resumeIn">or resume room</label>
+      <input id="resumeIn" type="text" maxlength="8" placeholder="ABCDE" style="text-transform:uppercase;width:8em">
+      <button type="button" id="resumeBtn" class="alt">Resume</button>
+    </div>
+    <p class="err" id="setupErr" role="alert"></p>
+    <p class="small">You can only resume a room from the same browser that created it, so keep using the same device as host.</p>
+  </section>
+
+  <div id="dash" hidden>
+    <section id="roomBox">
+      <h2>Room</h2>
+      <p class="center"><span class="roomcode" id="roomCode">-----</span></p>
+      <div class="formrow">
+        <input id="joinLink" type="text" readonly style="flex:1;min-width:12em" aria-label="Player link">
+        <button type="button" id="copyLink">Copy link</button>
+      </div>
+      <p class="small">Guests open this link (or the player page and the code). <span id="copyMsg" class="ok"></span></p>
+    </section>
+
+    <section id="auctionBox">
+      <h2>Auction</h2>
+      <h3>Gift pool</h3>
+      <p class="small" id="poolSummary">No gifts registered yet.</p>
+      <div id="giftPool"></div>
+      <div class="formrow">
+        <button type="button" id="randomGift" class="alt">Put up a random gift</button>
+      </div>
+      <details>
+        <summary>Add a gift yourself</summary>
+        <div class="formrow"><label for="hostGiftDesc" id="hostGiftLabel">What is it?</label>
+          <input id="hostGiftDesc" type="text" maxlength="60" style="flex:1;min-width:10em"></div>
+        <div class="formrow"><label><input type="checkbox" id="hostGiftHidden"> Hidden (mystery gift)</label>
+          <button type="button" id="hostGiftAdd">Add to pool</button></div>
+        <p class="small" id="hostGiftMsg"></p>
+      </details>
+
+      <h3>Or type an item</h3>
+      <div class="formrow"><label for="itemNameIn">Item</label>
+        <input id="itemNameIn" type="text" maxlength="60" placeholder="Mystery gift #4" style="flex:1;min-width:10em"></div>
+      <div class="formrow"><label for="itemClueIn">Clue</label>
+        <input id="itemClueIn" type="text" maxlength="80" placeholder="soft, under $5 (optional)" style="flex:1;min-width:10em"></div>
+      <div class="formrow">
+        <button type="button" id="putUpBtn">Put up &amp; open bidding</button>
+        <button type="button" id="closeBtn" class="alt">Close bidding</button>
+        <button type="button" id="noSaleBtn" class="ghost">No sale</button>
+      </div>
+      <p><strong id="itemState">No item up.</strong></p>
+      <div id="bidList"></div>
+      <p class="small">Tap &times;2 on a bid to count a Double Bid when ranking. The winner still pays only what they bid.</p>
+      <p class="err" id="auctionErr" role="alert"></p>
+    </section>
+
+    <section id="announceBox">
+      <h2>Announcements</h2>
+      <div class="formrow">
+        <label for="annTo">To</label><select id="annTo"><option value="all">Everyone</option></select>
+        <label for="annKind">Type</label>
+        <select id="annKind"><option value="hint">Hint</option><option value="alert">Alert</option><option value="info">Info</option></select>
+      </div>
+      <textarea id="annText" maxlength="200" placeholder="Type a message for the players' screens"></textarea>
+      <div class="formrow">
+        <label for="annDelay">Send in</label>
+        <input id="annDelay" type="number" min="0" step="1" value="0" style="width:5em"> <span>min (0 = now)</span>
+        <button type="button" id="annSend">Send</button>
+      </div>
+      <p class="err" id="annErr" role="alert"></p>
+
+      <h3>Quick alerts</h3>
+      <div class="formrow" id="quick"></div>
+
+      <h3>My hint ladder</h3>
+      <textarea id="ladder" placeholder="One hint per line, easiest last. Saved only on this device."></textarea>
+      <div class="formrow">
+        <button type="button" id="nextHint">Send next hint</button>
+        <span class="small" id="nextHintLabel"></span>
+      </div>
+      <div id="ladderBtns"></div>
+      <p class="small">Your hints are typed here and stay in this browser. They are never part of the site&rsquo;s code.</p>
+
+      <h3>Scheduled</h3>
+      <ul class="feed" id="queue"><li class="small">Nothing scheduled. Scheduled messages only send while this page stays open.</li></ul>
+
+      <h3>Sent to everyone</h3>
+      <ul class="feed" id="sentLog"><li class="small">Nothing sent yet.</li></ul>
+    </section>
+
+    <section id="playersBox">
+      <h2>Players</h2>
+      <table>
+        <thead><tr><th>Name</th><th>Wallet</th><th>Wins</th><th>Cards</th><th>Bid</th></tr></thead>
+        <tbody id="playersBody"><tr><td colspan="5" class="small">Waiting for players to join&hellip;</td></tr></tbody>
+      </table>
+
+      <h3>Wallet</h3>
+      <div class="formrow">
+        <select id="selPlayer" aria-label="Player"></select>
+        <input id="amtIn" type="number" min="1" step="1" inputmode="numeric" placeholder="$" style="width:6em" aria-label="Amount">
+        <button type="button" id="payBtn" class="alt">Pay +</button>
+        <button type="button" id="chargeBtn">Charge &minus;</button>
+      </div>
+      <p class="err" id="walletErr" role="alert"></p>
+
+      <h3>Give a card</h3>
+      <div class="formrow">
+        <select id="cardType" aria-label="Card type"></select>
+        <input id="cardCustom" type="text" maxlength="30" placeholder="or custom name" aria-label="Custom card name">
+        <button type="button" id="giveBtn">Give to selected player</button>
+      </div>
+      <p class="small" id="giveMsg"></p>
+    </section>
+
+    <section id="eventsBox">
+      <h2>Cards played</h2>
+      <ul class="feed" id="events"><li class="small">Nothing yet. Steals, Shields and other plays show up here so you can rule on them.</li></ul>
+    </section>
+
+    <section id="endBox">
+      <h2>End of party</h2>
+      <button type="button" id="endBtn" class="ghost">Delete this room and all its data</button>
+    </section>
+  </div>
+</main>
+
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+<script src="decor.js?v=9"></script>
+<script src="host.js?v=2"></script>
+</body>
+</html>

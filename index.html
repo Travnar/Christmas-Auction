@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Christmas Auction</title>
+<meta name="description" content="Rules for our Christmas Auction.">
+<link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<div class="lights" id="lights" aria-hidden="true"></div>
+<div class="marquee"><span id="marqueeText">&#9733; WELCOME TO THE CHRISTMAS AUCTION &#9733;</span></div>
+
+<header>
+  <div class="hero">
+    <img src="media/images/tree_art.png" alt="Decorated Christmas tree with presents">
+    <div class="mid">
+      <h1 class="wordart">Christmas Auction</h1>
+    </div>
+    <img src="media/images/tree_art.png" alt="Decorated Christmas tree with presents">
+  </div>
+</header>
+
+
+<main>
+  <section id="how">
+    <h2>How it works</h2>
+    <div class="card">
+      <ol>
+        <li><strong>Bring gifts:</strong> Any number of gifts, one big or many small, wrapped or unwrapped, with a total amount adding up to your group&rsquo;s amount.</li>
+        <li><strong>Bid:</strong> Everyone starts with the same amount of auction money and bids for the gifts they want.</li>
+        <li><strong>Score advantages:</strong> Bonuses that help during the auction are sold at auction and also hidden throughout the party.</li>
+        <li><strong>Play games:</strong> Win extra auction money by playing games like Saran Wrap Ball and Christmas Trivia.</li>
+        <li><strong>Auctioneer:</strong> Designate a party member to be the auctioneer. They can bid alongside auctioneering or designate someone to bid for them.</li>
+      </ol>
+      <p class="note center"><a href="rules.html">Read the full rules here.</a></p>
+    </div>
+  </section>
+
+  <section id="start" data-dev-only>
+    <div class="card center">
+      <a class="btn alt bigbtn" href="play.html">Join a game</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Merry Christmas!</p>
+</footer>
+
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+<script src="decor.js?v=9"></script>
+</body>
+</html>

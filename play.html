@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Play: Christmas Auction</title>
+<link rel="stylesheet" href="style.css?v=5">
+</head>
+<body data-calm>
+<canvas id="snow" aria-hidden="true"></canvas>
+<div class="lights" id="lights" aria-hidden="true"></div>
+<div class="marquee"><span id="marqueeText">&#9733; WELCOME TO THE CHRISTMAS AUCTION &#9733;</span></div>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+<main>
+  <p class="center small"><a href="index.html">Home</a> &middot; <a href="rules.html">Rules</a></p>
+  <h1 class="wordart" style="text-align:center;margin:14px 0 26px">Player Screen</h1>
+
+  <div class="card err" id="fatal" hidden></div>
+
+  <section id="joinBox">
+    <h2>Join the party</h2>
+    <form id="joinForm" autocomplete="off">
+      <div class="formrow"><label for="nameIn">Your name</label>
+        <input id="nameIn" type="text" maxlength="24" required placeholder="e.g. Aunt Barb"></div>
+      <div class="formrow"><label for="roomIn">Room code</label>
+        <input id="roomIn" type="text" maxlength="8" required placeholder="ABCDE" style="text-transform:uppercase;width:8em"></div>
+      <button type="submit">Join!</button>
+      <p class="err" id="joinErr" role="alert"></p>
+    </form>
+    <p class="small">Ask the host for the room code, or scan their QR code.</p>
+  </section>
+
+  <div id="game" hidden>
+    <section id="walletBox">
+      <h2>My wallet</h2>
+      <p class="center"><span class="lcd" id="bal">$0</span></p>
+      <p class="center small"><span id="whoami"></span> &middot; Gifts won: <span id="wins">0</span>/3</p>
+    </section>
+
+    <section id="giftsBox">
+      <h2>Gifts</h2>
+      <p class="small">Bring any mix of gifts that adds up to your group&rsquo;s amount, such as one big gift or several small ones. Add each one here, with no price needed. Hidden gifts stay a surprise.</p>
+      <form id="giftForm" autocomplete="off">
+        <div class="formrow">
+          <label for="giftDesc" id="giftDescLabel">What is it?</label>
+          <input id="giftDesc" type="text" maxlength="60" placeholder="Scented candle" style="flex:1;min-width:10em">
+        </div>
+        <div class="formrow">
+          <label><input type="checkbox" id="giftHidden"> Hidden (a wrapped mystery gift)</label>
+        </div>
+        <button type="submit" class="alt">Add gift</button>
+        <p class="err" id="giftMsg" role="alert"></p>
+      </form>
+      <p class="small" id="poolSummary">No gifts registered yet.</p>
+      <div id="myGifts"></div>
+    </section>
+
+    <section id="auctionBox">
+      <h2>Now bidding</h2>
+      <div class="card">
+        <div class="bigline" id="itemName">Waiting for the host&hellip;</div>
+        <p id="itemClue" class="small"></p>
+        <p id="itemStatus"></p>
+        <div id="bidUI" hidden>
+          <p>High bid: <strong id="highBid">none yet</strong></p>
+          <p>Your bid: <strong id="myBid">none</strong></p>
+          <div class="formrow">
+            <button type="button" id="inc1">+$1</button>
+            <button type="button" id="inc5">+$5</button>
+            <button type="button" id="inc10">+$10</button>
+          </div>
+          <div class="formrow">
+            <label for="customBid" class="small">Exact bid</label>
+            <input id="customBid" type="number" min="1" step="1" inputmode="numeric" style="width:6.5em">
+            <button type="button" id="bidBtn" class="alt">Bid</button>
+          </div>
+          <p class="err" id="bidMsg" role="alert"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="pileBox">
+      <h2>My pile</h2>
+      <ul class="feed" id="pile"><li class="small">Nothing won yet.</li></ul>
+    </section>
+
+    <section id="feedBox">
+      <h2>Announcements</h2>
+      <ul class="feed" id="feed"><li class="small">Nothing yet.</li></ul>
+    </section>
+  </div>
+</main>
+
+<script src="firebase-config.js"></script>
+<script src="app.js"></script>
+<script src="decor.js?v=9"></script>
+<script src="play.js?v=8"></script>
+</body>
+</html>
