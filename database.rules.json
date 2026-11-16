@@ -55,11 +55,11 @@
           }
         },
 
-        "cards": {
+        "advantages": {
           ".read": "auth != null && root.child('rooms').child($room).child('meta').child('hostUid').val() === auth.uid",
           "$uid": {
             ".read": "auth != null && auth.uid === $uid",
-            "$card": {
+            "$advantage": {
               "used": {
                 ".write": "auth != null && auth.uid === $uid && newData.val() === true && data.val() === false",
                 ".validate": "newData.isBoolean()"

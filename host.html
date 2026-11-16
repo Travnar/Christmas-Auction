@@ -110,7 +110,7 @@
     <section id="playersBox">
       <h2>Players</h2>
       <table>
-        <thead><tr><th>Name</th><th>Wallet</th><th>Wins</th><th>Cards</th><th>Bid</th></tr></thead>
+        <thead><tr><th>Name</th><th>Wallet</th><th>Wins</th><th>Advantages</th><th>Bid</th></tr></thead>
         <tbody id="playersBody"><tr><td colspan="5" class="small">Waiting for players to join&hellip;</td></tr></tbody>
       </table>
 
@@ -123,17 +123,17 @@
       </div>
       <p class="err" id="walletErr" role="alert"></p>
 
-      <h3>Give a card</h3>
+      <h3>Give an advantage</h3>
       <div class="formrow">
-        <select id="cardType" aria-label="Card type"></select>
-        <input id="cardCustom" type="text" maxlength="30" placeholder="or custom name" aria-label="Custom card name">
+        <select id="advantageType" aria-label="Advantage type"></select>
+        <input id="advantageCustom" type="text" maxlength="30" placeholder="or custom name" aria-label="Custom advantage name">
         <button type="button" id="giveBtn">Give to selected player</button>
       </div>
       <p class="small" id="giveMsg"></p>
     </section>
 
     <section id="eventsBox">
-      <h2>Cards played</h2>
+      <h2>Advantages played</h2>
       <ul class="feed" id="events"><li class="small">Nothing yet. Steals, Shields and other plays show up here so you can rule on them.</li></ul>
     </section>
 

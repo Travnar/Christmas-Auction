@@ -2,13 +2,13 @@
   'use strict';
   var X = window.Xmas, el = X.el;
   var S = null, uid = null, room = '';
-  var state = { players: {}, item: null, bids: {}, sold: {}, cards: {}, events: {}, annAll: {}, gifts: {} };
+  var state = { players: {}, item: null, bids: {}, sold: {}, advantages: {}, events: {}, annAll: {}, gifts: {} };
   var doubled = {};          // uid -> true when a Double Bid is counted on the current item
   var queue = [];            // scheduled announcements (this page only)
   var playerKey = '';
   var eventsPrimed = false, eventsSeen = {};
 
-  var CARD_PRESETS = [
+  var ADVANTAGE_PRESETS = [
     ['Steal', 'Take a gift from another player’s pile.'],
     ['Shield', 'Protects your pile from one Steal.'],
     ['Double Bid', 'Your bid on one gift counts double against other bids.'],
@@ -76,8 +76,8 @@
     $('roomCode').textContent = code;
     $('joinLink').value = new URL('play.html?room=' + code, location.href).href;
 
-    $('cardType').appendChild(el('option', { value: '', text: 'Choose a card…' }));
-    CARD_PRESETS.forEach(function (c, i) { $('cardType').appendChild(el('option', { value: String(i), text: c[0] })); });
+    $('advantageType').appendChild(el('option', { value: '', text: 'Choose an advantage…' }));
+    ADVANTAGE_PRESETS.forEach(function (c, i) { $('advantageType').appendChild(el('option', { value: String(i), text: c[0] })); });
     QUICK.forEach(function (q) {
       $('quick').appendChild(el('button', { type: 'button', class: 'alt', text: q, onclick: function () { send(q, 'all', 'alert'); } }));
     });
@@ -88,7 +88,7 @@
     sub('item', function (v) { state.item = v; renderItem(); renderBids(); });
     sub('bids', function (v) { state.bids = v || {}; renderPlayers(); renderBids(); });
     sub('sold', function (v) { state.sold = v || {}; renderPlayers(); });
-    sub('cards', function (v) { state.cards = v || {}; renderPlayers(); });
+    sub('advantages', function (v) { state.advantages = v || {}; renderPlayers(); });
     sub('announce/all', function (v) { state.annAll = v || {}; renderSent(); });
     sub('gifts', function (v) { state.gifts = v || {}; renderPool(); renderBids(); });
     sub('events', function (v) {
@@ -114,8 +114,8 @@
     Object.keys(state.sold).forEach(function (k) { if (state.sold[k].winnerUid === u) n++; });
     return n;
   }
-  function cardCounts(u) {
-    var c = state.cards[u] || {}, total = 0, unused = 0;
+  function advantageCounts(u) {
+    var c = state.advantages[u] || {}, total = 0, unused = 0;
     Object.keys(c).forEach(function (k) { total++; if (!c[k].used) unused++; });
     return unused + '/' + total;
   }
@@ -139,7 +139,7 @@
       var p = state.players[u], b = currentBid(u);
       body.appendChild(el('tr', {}, [
         el('td', { text: p.name }), el('td', { text: X.money(p.balance) }),
-        el('td', { text: String(winsOf(u)) }), el('td', { text: cardCounts(u) }),
+        el('td', { text: String(winsOf(u)) }), el('td', { text: advantageCounts(u) }),
         el('td', { text: b ? X.money(b.amount) : '-' })
       ]));
     });
@@ -173,16 +173,16 @@
   $('chargeBtn').addEventListener('click', function () { adjust(-1); });
 
   $('giveBtn').addEventListener('click', function () {
-    var u = $('selPlayer').value, idx = $('cardType').value, custom = $('cardCustom').value.trim();
+    var u = $('selPlayer').value, idx = $('advantageType').value, custom = $('advantageCustom').value.trim();
     if (!u) return say('giveMsg', 'Pick a player first.');
-    var card;
-    if (custom) card = { name: custom.slice(0, 30), desc: '' };
-    else if (idx !== '') card = { name: CARD_PRESETS[idx][0], desc: CARD_PRESETS[idx][1] };
-    else return say('giveMsg', 'Choose a card or type a custom name.');
-    card.used = false; card.ts = Date.now();
-    S.push(base() + '/cards/' + u, card).then(function () {
-      say('giveMsg', 'Gave ' + card.name + ' to ' + state.players[u].name + '.', true);
-      $('cardCustom').value = '';
+    var adv;
+    if (custom) adv = { name: custom.slice(0, 30), desc: '' };
+    else if (idx !== '') adv = { name: ADVANTAGE_PRESETS[idx][0], desc: ADVANTAGE_PRESETS[idx][1] };
+    else return say('giveMsg', 'Choose an advantage or type a custom name.');
+    adv.used = false; adv.ts = Date.now();
+    S.push(base() + '/advantages/' + u, adv).then(function () {
+      say('giveMsg', 'Gave ' + adv.name + ' to ' + state.players[u].name + '.', true);
+      $('advantageCustom').value = '';
     }).catch(function (e) { say('giveMsg', (e && e.message) || String(e)); });
   });
 
