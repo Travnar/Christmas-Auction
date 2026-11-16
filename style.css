@@ -251,3 +251,9 @@ html.minimal{--mgreen:#0f3d2e;--mgreen2:#165240;--mred:#b3262e;--mgold:#e8b84a;-
 
 .minimal footer{color:#cfc8b3;text-shadow:none;font-weight:400;font-size:.9rem;padding:30px 20px 50px}
 .minimal .themebtn{color:#cfc8b3}
+
+/* ---------- trivia page ---------- */
+.trivia-q{font-size:1.4rem;font-weight:bold;min-height:3.2em;margin:.6em 0}
+.trivia-a{font-size:1.25rem;font-weight:bold;color:#0b5a2b;margin:.4em 0 1em}
+.minimal .trivia-q{font-family:var(--mserif)}
+.minimal .trivia-a{color:var(--mgreen)}
