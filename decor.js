@@ -118,15 +118,16 @@ if (!IN_DEVELOPMENT) document.documentElement.classList.add('dev-off');
 })();
 
 /* Background music: loops on every page at low volume, with a stop/play button.
- * Browsers block autoplay, so it starts on the first tap/click/keypress.
- * Position and stopped state carry across pages. */
+ * Off by default: it only plays after the user presses the play button.
+ * Once turned on, it resumes on later pages (on the first tap/keypress, since
+ * browsers block autoplay). Position and on/off state carry across pages. */
 (function () {
   var SRC = 'media/audio/jingle_bells.mp3', VOL = 0.2;
   var a = new Audio(SRC);
   a.loop = true; a.volume = VOL; a.preload = 'auto';
   function get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
   function set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }
-  var muted = get('xmas-music-muted') === '1';
+  var muted = get('xmas-music-muted') !== '0'; // off by default until the user hits play
   var btn = document.createElement('button');
   btn.type = 'button'; btn.className = 'musicbtn';
   function label() {
