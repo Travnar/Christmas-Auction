@@ -51,7 +51,7 @@ if (!IN_DEVELOPMENT) document.documentElement.classList.add('dev-off');
   });
 })();
 
-/* Scrolling banner: welcome text + countdown to Christmas Day, then the host's latest announcements
+/* Scrolling banner: welcome text + countdown to Christmas Day, then the host's current announcement
  * (for the room in ?room=CODE, or the room this browser joined/hosts). Each letter is its own <span>,
  * colored red / green / white in turn. */
 (function () {
@@ -59,7 +59,7 @@ if (!IN_DEVELOPMENT) document.documentElement.classList.add('dev-off');
   if (!span) return;
   var WELCOME = '\u2605 WELCOME TO THE CHRISTMAS AUCTION \u2605';
   var SEP = ' \u2605 ';
-  var ann = [];           // latest announcement texts, newest first
+  var ann = [];           // the host's current announcement, if any
   var cells = [], text = null;
 
   function render(t) {
@@ -111,11 +111,8 @@ if (!IN_DEVELOPMENT) document.documentElement.classList.add('dev-off');
   if (!code || !window.Xmas) return;
   window.Xmas.connect().then(function (S) {
     S.on('rooms/' + code + '/announce/all', function (v) {
-      v = v || {};
-      ann = Object.keys(v).map(function (k) { return v[k]; })
-        .filter(function (x) { return x && x.text; })
-        .sort(function (x, y) { return y.ts - x.ts; }).slice(0, 3)
-        .map(function (x) { return x.text; });
+      var latest = window.Xmas.announcements(v)[0];
+      ann = latest ? [latest.text] : [];
       tick();
     });
   }).catch(function () {});

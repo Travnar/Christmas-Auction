@@ -5,33 +5,18 @@
     "rooms": {
       "$room": {
         ".write": "auth != null && data.child('meta').child('hostUid').val() === auth.uid",
-
         "meta": {
           ".read": "auth != null",
           ".write": "auth != null && !data.exists() && newData.child('hostUid').val() === auth.uid",
-          ".validate": "newData.child('hostUid').isString()"
+          ".validate": "newData.child('hostUid').isString() && (!newData.child('startMoney').exists() || (newData.child('startMoney').isNumber() && newData.child('startMoney').val() >= 1 && newData.child('startMoney').val() <= 100000 && newData.child('startMoney').val() % 1 === 0)) && (!newData.child('giftCap').exists() || (newData.child('giftCap').isNumber() && newData.child('giftCap').val() >= 1 && newData.child('giftCap').val() <= 100000 && newData.child('giftCap').val() % 1 === 0))"
         },
-
         "players": {
           ".read": "auth != null",
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.child('balance').val() === 200",
+            ".write": "auth != null && auth.uid === $uid && !data.exists() && (root.child('rooms').child($room).child('meta').child('startMoney').exists() ? newData.child('balance').val() === root.child('rooms').child($room).child('meta').child('startMoney').val() : newData.child('balance').val() === 200)",
             ".validate": "newData.hasChildren(['name', 'balance']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 24 && newData.child('balance').isNumber() && newData.child('balance').val() >= 0"
           }
         },
-
-        "item": {
-          ".read": "auth != null"
-        },
-
-        "bids": {
-          ".read": "auth != null",
-          "$uid": {
-            ".write": "auth != null && auth.uid === $uid && newData.exists() && root.child('rooms').child($room).child('item').child('open').val() === true && newData.child('amount').val() <= root.child('rooms').child($room).child('players').child($uid).child('balance').val()",
-            ".validate": "newData.hasChildren(['amount', 'itemId']) && newData.child('amount').isNumber() && newData.child('amount').val() >= 1 && newData.child('amount').val() % 1 === 0 && newData.child('itemId').val() === root.child('rooms').child($room).child('item').child('id').val()"
-          }
-        },
-
         "gifts": {
           ".read": "auth != null",
           "$gift": {
@@ -39,22 +24,14 @@
             ".validate": "newData.hasChildren(['ownerUid', 'hidden', 'status']) && newData.child('hidden').isBoolean() && (newData.child('status').val() === 'pool' || newData.child('status').val() === 'up' || newData.child('status').val() === 'sold') && ((newData.child('hidden').val() === true && !newData.child('desc').exists()) || (newData.child('hidden').val() === false && newData.child('desc').isString() && newData.child('desc').val().length > 0 && newData.child('desc').val().length <= 60))"
           }
         },
-
-        "sold": {
-          ".read": "auth != null"
-        },
-
         "announce": {
           "all": {
-            ".read": "auth != null"
-          },
-          "direct": {
-            "$uid": {
-              ".read": "auth != null && auth.uid === $uid"
+            ".read": "auth != null",
+            "$id": {
+              ".validate": "newData.hasChildren(['text', 'ts']) && newData.child('text').isString() && newData.child('text').val().length <= 200"
             }
           }
         },
-
         "advantages": {
           ".read": "auth != null && root.child('rooms').child($room).child('meta').child('hostUid').val() === auth.uid",
           "$uid": {
@@ -67,12 +44,11 @@
             }
           }
         },
-
-        "events": {
-          ".read": "auth != null && root.child('rooms').child($room).child('meta').child('hostUid').val() === auth.uid",
-          "$id": {
-            ".write": "auth != null && !data.exists() && newData.child('from').val() === auth.uid",
-            ".validate": "newData.hasChildren(['from', 'name', 'text']) && newData.child('text').isString() && newData.child('text').val().length <= 160 && newData.child('name').isString() && newData.child('name').val().length <= 24"
+        "ideas": {
+          ".read": "auth != null",
+          "$idea": {
+            ".write": "auth != null && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('ownerUid').val() === auth.uid))",
+            ".validate": "newData.hasChildren(['ownerUid', 'text', 'ts']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 80"
           }
         }
       }

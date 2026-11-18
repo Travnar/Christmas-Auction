@@ -7,8 +7,8 @@
 | `index.html` | Landing page: Join button and How it works (host screen is not linked; open `host.html` directly) |
 | `rules.html` | Full public rules (gifts, auctioning, advantages, games) |
 | `advantages.html` | Detailed list of every advantage |
-| `play.html` / `play.js` | Player screen: join, wallet, live bidding, advantages, announcements |
-| `host.html` / `host.js` | Host control room: auction, wallets, advantages, announcements, hint ladder |
+| `play.html` / `play.js` | Player screen: join, wallet, add gifts, past announcements |
+| `host.html` / `host.js` | Host control room: party gifts, announcements, games (trivia), players |
 | `app.js` | Shared code and the data store (demo or Firebase) |
 | `firebase-config.js` | Switch between demo mode and your Firebase project |
 | `database.rules.json` | Security rules to paste into Firebase |
@@ -55,7 +55,7 @@ browser tab acts as a different person.
 
 1. Open `host.html` and click **Create a new room**.
 2. Open `play.html?room=THECODE` in two more tabs of the same browser and join with different names.
-3. Put up an item on the host tab, bid from the player tabs, and sell it. Send an announcement.
+3. Add gifts from the player tabs and watch them appear in the host's Gift Pool. Send an announcement.
 
 Demo mode does **not** sync between phones. For that you need Firebase (below).
 
@@ -82,20 +82,14 @@ Players open `https://yourname.github.io/yourrepo/play.html?room=CODE`.
 - **Host from one device** (a laptop or tablet) and keep that browser. A room can only be resumed
   from the browser that created it. Keep it plugged in and awake.
 - **Share the room code or link** from the host screen. Anyone with the code can join, so don't post it publicly.
-- **Hint ladder:** type your hints into the host screen. They are saved only in your browser, never in the
-  site's files, so guests can't read them from the page source.
-- **Scheduled announcements** only send while the host page stays open.
-- **Gift pool:** guests register each gift on their phone, with a description or marked hidden (no description needed). Put gifts up one by one or pick a random one. Hidden gifts go up as "Mystery gift #N". A gift that's put up but not sold returns to the pool. You can add your own gifts too.
-- **Advantages:** give advantages to players from the host screen, whether bought at auction or found
-  during the party. When a player plays one, it shows in the host's "Advantages played" list so you can rule on it
-  (steals, protection and blocks are resolved by you).
-- **Money:** use Pay and Charge for the Saran Wrap Ball, trivia and Bank Heists.
-- **Win cap:** the host screen flags anyone at 3 wins but doesn't block the sale.
+- **Announcements:** the newest message scrolls across everyone's banner. Older ones stay listed under Past Announcements on each player's screen.
+- **Games:** Christmas movie trivia is built into the host screen's Games section.
+- **Gift pool:** guests register each gift on their phone, with a description or marked hidden (no description needed). The host screen lists every gift added. The auction itself is run out loud.
 - **After the party:** click **Delete this room** to remove everything.
 
 ## Known limits
 
-- Players start with exactly $200. That number is also in the security rules, so change both together.
+- The host sets the starting auction money (default $100) and the gift cap (default $10) when creating a room. The gift cap is shown to players as a guide; gifts have no prices, so it isn't enforced.
 - Built for a few dozen guests, not for public use.
 - Tested here in demo mode (one host and two players). It has not been run against a live Firebase project,
   so do a quick dry run with two phones before the party. If the Firebase library version in `app.js`

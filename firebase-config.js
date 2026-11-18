@@ -9,12 +9,13 @@
  * and set demo to false. See README.md for the step-by-step.
  */
 window.XMAS_CONFIG = {
-  demo: true,
   firebase: {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBJnu3G88IAeHPaeTnK2fB9St010DflCUI",
+    authDomain: "christmas-auction.firebaseapp.com",
+    // Check this against Realtime Database > Data in the Firebase console. This is the US default;
+    // other regions look like https://christmas-auction-default-rtdb.europe-west1.firebasedatabase.app
+    databaseURL: "https://christmas-auction-default-rtdb.firebaseio.com/",
+    projectId: "christmas-auction",
+    appId: "1:291837948193:web:6e7816ac0e7fda6ec58e60"
   }
 };

@@ -158,6 +158,25 @@
   function fmtTime(ts) {
     try { return new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; }
   }
+  // Write text one letter per <span>, colored red / green / white in turn like the banner.
+  function tricolor(node, text) {
+    node.textContent = '';
+    if (node.classList) node.classList.add('tricolor');
+    var n = 0;
+    String(text).split('').forEach(function (ch) {
+      var s = document.createElement('span');
+      if (ch !== ' ') s.className = 'c' + (n++ % 3);
+      s.textContent = ch;
+      node.appendChild(s);
+    });
+  }
+  // Announcement list (an object of pushed {text, ts}) as an array, newest first.
+  function announcements(v) {
+    v = v || {};
+    return Object.keys(v).map(function (k) { return v[k]; })
+      .filter(function (a) { return a && a.text; })
+      .sort(function (a, b) { return b.ts - a.ts; });
+  }
   function cleanCode(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8); }
   function genCode() {
     var s = '', i;
@@ -194,6 +213,6 @@
 
   window.Xmas = {
     connect: connect, el: el, money: money, fmtTime: fmtTime, cleanCode: cleanCode,
-    genCode: genCode, ls: ls, banner: banner, unlockAudio: unlockAudio, beep: beep
+    genCode: genCode, announcements: announcements, tricolor: tricolor, ls: ls, banner: banner, unlockAudio: unlockAudio, beep: beep
   };
 })();
