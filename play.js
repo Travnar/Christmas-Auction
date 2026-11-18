@@ -20,7 +20,7 @@
     'Red Ryder BB Gun', 'Jelly of the Month Club Membership', 'Turbo Man Action Figure', 'Leg Lamp',
     'Pink Bunny Suit', 'Bell from Santa’s Sleigh', 'Little Orphan Annie Decoder Pin', 'Zuzu’s Petals',
     'Polar Express Golden Ticket', 'Cousin Eddie’s RV', 'Kevin’s Tarantula', 'Buddy’s Etch A Sketch',
-    'Ugly Christmas Sweater', 'Lump of Coal', 'Who-pudding', 'Snow Globe', 'Charlie Brown’s Tree'
+    'Ugly Christmas Sweater', 'Lump of Coal', 'Snow Globe', 'Charlie Brown’s Tree', 'My Two Front Teeth'
   ];
   var NAME_IDEAS = [
     'Mrs. Claus', 'Santa Claus', 'Buddy the Elf', 'Scott Calvin', 'Hans Gruber', 'Kevin McCallister',
