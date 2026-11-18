@@ -168,6 +168,7 @@
     if (!window.confirm(msg)) return;
     var upd = {};
     upd['players/' + u] = null;
+    if (p.nameKey) upd['names/' + p.nameKey] = null;   // free the name so it can be used again
     gifts.forEach(function (k) { upd['gifts/' + k] = null; });
     ideas.forEach(function (k) { upd['ideas/' + k] = null; });
     S.update(base(), upd).catch(function (e) { say('playersErr', (e && e.message) || String(e)); });

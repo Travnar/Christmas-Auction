@@ -170,6 +170,15 @@
       node.appendChild(s);
     });
   }
+  // Case-insensitive, database-safe key for a player name, so "Greg" and "greg " count as the same name.
+  function nameKey(name) {
+    var s = String(name || '').trim().toLowerCase().replace(/\s+/g, ' '), out = '', i, ch;
+    for (i = 0; i < s.length; i++) {
+      ch = s.charAt(i);
+      out += /[a-z0-9]/.test(ch) ? ch : '_' + s.charCodeAt(i).toString(16);
+    }
+    return out;
+  }
   // Announcement list (an object of pushed {text, ts}) as an array, newest first.
   function announcements(v) {
     v = v || {};
@@ -213,6 +222,6 @@
 
   window.Xmas = {
     connect: connect, el: el, money: money, fmtTime: fmtTime, cleanCode: cleanCode,
-    genCode: genCode, announcements: announcements, tricolor: tricolor, ls: ls, banner: banner, unlockAudio: unlockAudio, beep: beep
+    genCode: genCode, announcements: announcements, nameKey: nameKey, tricolor: tricolor, ls: ls, banner: banner, unlockAudio: unlockAudio, beep: beep
   };
 })();

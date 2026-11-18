@@ -60,11 +60,18 @@
     S.get('rooms/' + code + '/meta').then(function (meta) {
       if (!meta) { joinErr('No party found with that code.'); return; }
       return S.get('rooms/' + code + '/players/' + uid).then(function (p) {
-        if (p && p.name) { start(code, p.name); return; }
-        return S.set('rooms/' + code + '/players/' + uid, { name: name, balance: meta.startMoney || 200, joined: Date.now() })
-          .then(function () { start(code, name); });
+        if (p && p.name) { start(code, p.name); return; }   // this browser already joined: just resume
+        // A name is unique within a room. Claim it first (the database refuses a second claim), then join.
+        var key = X.nameKey(name), taken = 'The name “' + name + '” is already taken in this room. Pick a different one.';
+        if (!key) { joinErr('Enter a name.'); return; }
+        return S.get('rooms/' + code + '/names/' + key).then(function (owner) {
+          if (owner && owner !== uid) { joinErr(taken); return; }
+          return S.set('rooms/' + code + '/names/' + key, uid).catch(function () { throw new Error(taken); }).then(function () {
+            return S.set('rooms/' + code + '/players/' + uid, { name: name, nameKey: key, balance: meta.startMoney || 200, joined: Date.now() });
+          }).then(function () { start(code, name); });
+        });
       });
-    }).catch(function (err) { joinErr('Could not join: ' + ((err && err.message) || err)); });
+    }).catch(function (err) { joinErr((err && err.message && /already taken/.test(err.message)) ? err.message : 'Could not join: ' + ((err && err.message) || err)); });
   });
 
   /* ---------- game ---------- */

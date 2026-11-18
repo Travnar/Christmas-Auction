@@ -13,7 +13,7 @@
         "players": {
           ".read": "auth != null",
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid && !data.exists() && (root.child('rooms').child($room).child('meta').child('startMoney').exists() ? newData.child('balance').val() === root.child('rooms').child($room).child('meta').child('startMoney').val() : newData.child('balance').val() === 200)",
+            ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.child('nameKey').isString() && root.child('rooms').child($room).child('names').child(newData.child('nameKey').val()).val() === auth.uid && (root.child('rooms').child($room).child('meta').child('startMoney').exists() ? newData.child('balance').val() === root.child('rooms').child($room).child('meta').child('startMoney').val() : newData.child('balance').val() === 200)",
             ".validate": "newData.hasChildren(['name', 'balance']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 24 && newData.child('balance').isNumber() && newData.child('balance').val() >= 0"
           }
         },
@@ -49,6 +49,13 @@
           "$idea": {
             ".write": "auth != null && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('ownerUid').val() === auth.uid))",
             ".validate": "newData.hasChildren(['ownerUid', 'text', 'ts']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 80"
+          }
+        },
+        "names": {
+          ".read": "auth != null",
+          "$key": {
+            ".write": "auth != null && !data.exists() && newData.val() === auth.uid",
+            ".validate": "newData.isString()"
           }
         }
       }
