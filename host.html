@@ -6,7 +6,7 @@
 <title>Host: Christmas Auction</title>
 <meta name="robots" content="noindex">
 <script src="theme.js?v=5"></script>
-<link rel="stylesheet" href="style.css?v=23">
+<link rel="stylesheet" href="style.css?v=25">
 </head>
 <body data-calm>
 <canvas id="snow" aria-hidden="true"></canvas>
@@ -32,6 +32,11 @@
           <div class="money-in"><span aria-hidden="true">$</span><input id="giftCapIn" type="number" min="1" max="100000" step="1" inputmode="numeric" value="10"></div>
           <p class="small">The total value of gifts each player brings.</p>
         </div>
+        <div class="field">
+          <label for="hostCodeIn">Host code</label>
+          <input id="hostCodeIn" type="text" maxlength="8" autocomplete="off" style="text-transform:uppercase;width:9em" aria-describedby="hostCodeHelp">
+          <p class="small" id="hostCodeHelp">Your password for hosting. With it you can host this room from any device. Letters and numbers, 6 to 8 characters. Write it down.</p>
+        </div>
         <button type="button" id="createBtn" class="wide">Create room</button>
       </section>
 
@@ -40,7 +45,11 @@
         <div class="field">
           <label for="resumeIn">Room code</label>
           <input id="resumeIn" type="text" maxlength="8" placeholder="ABCDE" style="text-transform:uppercase;width:9em">
-          <p class="small">Only works in the same browser that created the room, so keep hosting from one device.</p>
+        </div>
+        <div class="field">
+          <label for="resumeCodeIn">Host code</label>
+          <input id="resumeCodeIn" type="text" maxlength="8" autocomplete="off" style="text-transform:uppercase;width:9em">
+          <p class="small">Not needed in the browser that created the room.</p>
         </div>
         <button type="button" id="resumeBtn" class="alt wide">Resume room</button>
       </section>
@@ -56,6 +65,7 @@
         <div class="stat"><div class="stat-label">Starting money</div><span class="roomcode" id="statMoney">$&ndash;</span></div>
         <div class="stat"><div class="stat-label">Gift cap / player</div><span class="roomcode" id="statCap">$&ndash;</span></div>
       </div>
+      <p class="small hostcode-row">Host code: <strong id="hostCodeShow" class="mono">&bull;&bull;&bull;&bull;&bull;&bull;</strong> <button type="button" id="hostCodeToggle" class="ghost">Show</button> Use it with the room code to host from another device. Keep it private.</p>
       <div class="formrow">
         <input id="joinLink" type="text" readonly style="flex:1;min-width:12em" aria-label="Player link">
         <button type="button" id="copyLink">Copy link</button>
@@ -119,7 +129,7 @@
 
 <script src="firebase-config.js?v=2"></script>
 <script src="app.js?v=4"></script>
-<script src="decor.js?v=13"></script>
-<script src="host.js?v=18"></script>
+<script src="decor.js?v=14"></script>
+<script src="host.js?v=20"></script>
 </body>
 </html>

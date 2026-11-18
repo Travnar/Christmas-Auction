@@ -2,7 +2,8 @@
   'use strict';
   var X = window.Xmas, el = X.el;
   var S = null, uid = null, room = '';
-  var state = { players: {}, gifts: {}, ideas: {}, startMoney: 200 };
+  var state = { players: {}, gifts: {}, ideas: {}, hosts: {}, names: {}, startMoney: 200 };
+  var hostCode = '';
   var amounts = {};   // uid -> text typed in that row's amount box (kept across re-renders)
 
   function $(id) { return document.getElementById(id); }
@@ -12,14 +13,39 @@
   /* ---------- boot ---------- */
   X.connect().then(function (store) {
     S = store; uid = S.uid; X.banner(S);
+    $('hostCodeIn').value = X.genCode() + X.genCode().charAt(0);   // 6 random characters, editable
     var saved = X.cleanCode(X.ls.get('xmas-host-room') || '');
     if (saved) {
       $('resumeIn').value = saved;
-      return S.get('rooms/' + saved + '/meta').then(function (m) {
-        if (m && m.hostUid === uid) startHost(saved);
-      });
+      return isHost(saved).then(function (yes) { if (yes) startHost(saved); });
     }
   }).catch(fatal);
+
+  // Hosts are listed under rooms/CODE/hosts. A room made before host codes has only meta.hostUid, so that
+  // browser is added to the list the first time it resumes.
+  function isHost(code) {
+    return S.get('rooms/' + code + '/hosts/' + uid).then(function (yes) {
+      if (yes === true) return true;
+      return S.get('rooms/' + code + '/meta').then(function (m) {
+        if (!m || m.hostUid !== uid) return false;
+        return S.set('rooms/' + code + '/hosts/' + uid, true).then(function () { return true; });
+      });
+    });
+  }
+
+  // Take over hosting from another device: file the code, then ask to be listed as a host.
+  // The database rules compare the code with the room's real one, so a wrong code is refused.
+  function claimHost(code, secret) {
+    var wrong = new Error('Wrong host code.');
+    var claim = 'rooms/' + code + '/hostClaims/' + uid;
+    var check = S.mode === 'demo'   // demo mode has no database rules, so check here
+      ? S.get('rooms/' + code + '/hostCode').then(function (real) { if (real !== secret) throw wrong; })
+      : Promise.resolve();
+    return check.then(function () { return S.set(claim, secret); })
+      .then(function () { return S.set('rooms/' + code + '/hosts/' + uid, true); })
+      .then(function () { return S.remove(claim).catch(function () {}); },
+        function (e) { S.remove(claim).catch(function () {}); throw wrong; });
+  }
 
   function wholeDollars(id) {
     var n = Number($(id).value);
@@ -30,13 +56,19 @@
     if (!S) return;
     X.unlockAudio(); say('setupErr', '');
     var startMoney = wholeDollars('startMoneyIn'), giftCap = wholeDollars('giftCapIn');
+    var secret = X.cleanCode($('hostCodeIn').value);
     if (!startMoney) return say('setupErr', 'Enter the starting auction money as a whole dollar amount.');
     if (!giftCap) return say('setupErr', 'Enter the gift cap as a whole dollar amount.');
+    if (secret.length < 6) return say('setupErr', 'The host code needs 6 to 8 letters or numbers.');
     (function attempt(n) {
       var code = X.genCode();
       S.get('rooms/' + code + '/meta').then(function (m) {
         if (m) { if (n < 6) return attempt(n + 1); throw new Error('Could not find a free room code. Try again.'); }
-        return S.set('rooms/' + code + '/meta', { hostUid: uid, created: Date.now(), startMoney: startMoney, giftCap: giftCap }).then(function () { startHost(code); });
+        // Meta first (it names the creator), then the host code, then the host list.
+        return S.set('rooms/' + code + '/meta', { hostUid: uid, created: Date.now(), startMoney: startMoney, giftCap: giftCap })
+          .then(function () { return S.set('rooms/' + code + '/hostCode', secret); })
+          .then(function () { return S.set('rooms/' + code + '/hosts/' + uid, true); })
+          .then(function () { startHost(code); });
       }).catch(function (e) { say('setupErr', (e && e.message) || String(e)); });
     })(0);
   });
@@ -48,8 +80,12 @@
     if (!code) return say('setupErr', 'Enter a room code.');
     S.get('rooms/' + code + '/meta').then(function (m) {
       if (!m) return say('setupErr', 'No room with that code.');
-      if (m.hostUid !== uid) return say('setupErr', 'That room was created by a different device or browser, so you can’t host it from here.');
-      startHost(code);
+      return isHost(code).then(function (yes) {
+        if (yes) return startHost(code);
+        var secret = X.cleanCode($('resumeCodeIn').value);
+        if (!secret) return say('setupErr', 'Enter the host code.');
+        return claimHost(code, secret).then(function () { startHost(code); });
+      });
     }).catch(function (e) { say('setupErr', (e && e.message) || String(e)); });
   });
 
@@ -64,6 +100,10 @@
     $('joinLink').value = new URL('play.html?room=' + code, location.href).href;
     $('toPlayer').href = 'play.html?room=' + code;
     $('toPlayerBar').hidden = false;
+    S.get(base() + '/hostCode').then(function (c) {
+      hostCode = c || '';
+      $('hostCodeShow').parentNode.hidden = !hostCode;   // rooms made before host codes have none
+    }).catch(function () { $('hostCodeShow').parentNode.hidden = true; });
     S.get(base() + '/meta').then(function (m) {
       m = m || {};
       state.startMoney = m.startMoney || 200;
@@ -75,9 +115,18 @@
 
     sub('players', function (v) { state.players = v || {}; renderPlayers(); renderPool(); });
     sub('gifts', function (v) { state.gifts = v || {}; renderPool(); renderPlayers(); });
+    sub('hosts', function (v) { state.hosts = v || {}; renderPool(); });
+    sub('names', function (v) { state.names = v || {}; renderPool(); });
     sub('ideas', function (v) { state.ideas = v || {}; renderIdeas(); renderPlayers(); });
     sub('announce/all', renderAnnouncement);
   }
+
+  /* ---------- host code: hidden until the host chooses to show it ---------- */
+  $('hostCodeToggle').addEventListener('click', function () {
+    var shown = this.textContent === 'Hide';
+    $('hostCodeShow').textContent = shown ? '\u2022\u2022\u2022\u2022\u2022\u2022' : hostCode;
+    this.textContent = shown ? 'Show' : 'Hide';
+  });
 
   /* ---------- room link ---------- */
   $('copyLink').addEventListener('click', function () {
@@ -168,7 +217,7 @@
     if (!window.confirm(msg)) return;
     var upd = {};
     upd['players/' + u] = null;
-    if (p.nameKey) upd['names/' + p.nameKey] = null;   // free the name so it can be used again
+    upd['names/' + u] = null;   // free the name so it can be used again
     gifts.forEach(function (k) { upd['gifts/' + k] = null; });
     ideas.forEach(function (k) { upd['ideas/' + k] = null; });
     S.update(base(), upd).catch(function (e) { say('playersErr', (e && e.message) || String(e)); });
@@ -176,7 +225,7 @@
 
   /* ---------- party gifts: same cards as the player page; the host can remove any gift ---------- */
   function ownerName(g) {
-    if (g.ownerUid === uid) return 'Host';
+    if (state.hosts[state.names[g.ownerUid]] === true) return 'Host';
     return state.players[g.ownerUid] ? state.players[g.ownerUid].name : 'a guest';
   }
   function renderPool() {

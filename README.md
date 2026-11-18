@@ -84,6 +84,7 @@ Players open `https://yourname.github.io/yourrepo/play.html?room=CODE`.
 - **Share the room code or link** from the host screen. Anyone with the code can join, so don't post it publicly.
 - **Announcements:** the newest message scrolls across everyone's banner. Older ones stay listed under Past Announcements on each player's screen.
 - **Games:** Christmas movie trivia is built into the host screen's Games section.
+- **Names and logging in:** a name is unique in a room. Typing a name that is already in the room, with the room code, offers to log you in as that player on this device (handy after switching phones). Anyone who knows the name could do the same, so this suits a party of friends.
 - **Gift pool:** guests register each gift on their phone, with a description or marked hidden (no description needed). The host screen lists every gift added. The auction itself is run out loud.
 - **After the party:** click **Delete this room** to remove everything.
 

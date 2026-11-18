@@ -4,7 +4,7 @@
     ".write": false,
     "rooms": {
       "$room": {
-        ".write": "auth != null && data.child('meta').child('hostUid').val() === auth.uid",
+        ".write": "auth != null && root.child('rooms').child($room).child('hosts').child(auth.uid).val() === true",
         "meta": {
           ".read": "auth != null",
           ".write": "auth != null && !data.exists() && newData.child('hostUid').val() === auth.uid",
@@ -12,15 +12,15 @@
         },
         "players": {
           ".read": "auth != null",
-          "$uid": {
-            ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.child('nameKey').isString() && root.child('rooms').child($room).child('names').child(newData.child('nameKey').val()).val() === auth.uid && (root.child('rooms').child($room).child('meta').child('startMoney').exists() ? newData.child('balance').val() === root.child('rooms').child($room).child('meta').child('startMoney').val() : newData.child('balance').val() === 200)",
+          "$pid": {
+            ".write": "auth != null && !data.exists() && root.child('rooms').child($room).child('names').child($pid).val() === auth.uid && (root.child('rooms').child($room).child('meta').child('startMoney').exists() ? newData.child('balance').val() === root.child('rooms').child($room).child('meta').child('startMoney').val() : newData.child('balance').val() === 200)",
             ".validate": "newData.hasChildren(['name', 'balance']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 24 && newData.child('balance').isNumber() && newData.child('balance').val() >= 0"
           }
         },
         "gifts": {
           ".read": "auth != null",
           "$gift": {
-            ".write": "auth != null && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('ownerUid').val() === auth.uid && data.child('status').val() === 'pool'))",
+            ".write": "auth != null && ((!data.exists() && root.child('rooms').child($room).child('names').child(newData.child('ownerUid').val()).val() === auth.uid) || (data.exists() && !newData.exists() && root.child('rooms').child($room).child('names').child(data.child('ownerUid').val()).val() === auth.uid && data.child('status').val() === 'pool'))",
             ".validate": "newData.hasChildren(['ownerUid', 'hidden', 'status']) && newData.child('hidden').isBoolean() && (newData.child('status').val() === 'pool' || newData.child('status').val() === 'up' || newData.child('status').val() === 'sold') && ((newData.child('hidden').val() === true && !newData.child('desc').exists()) || (newData.child('hidden').val() === false && newData.child('desc').isString() && newData.child('desc').val().length > 0 && newData.child('desc').val().length <= 60))"
           }
         },
@@ -33,7 +33,7 @@
           }
         },
         "advantages": {
-          ".read": "auth != null && root.child('rooms').child($room).child('meta').child('hostUid').val() === auth.uid",
+          ".read": "auth != null && root.child('rooms').child($room).child('hosts').child(auth.uid).val() === true",
           "$uid": {
             ".read": "auth != null && auth.uid === $uid",
             "$advantage": {
@@ -47,16 +47,34 @@
         "ideas": {
           ".read": "auth != null",
           "$idea": {
-            ".write": "auth != null && ((!data.exists() && newData.child('ownerUid').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('ownerUid').val() === auth.uid))",
+            ".write": "auth != null && ((!data.exists() && root.child('rooms').child($room).child('names').child(newData.child('ownerUid').val()).val() === auth.uid) || (data.exists() && !newData.exists() && root.child('rooms').child($room).child('names').child(data.child('ownerUid').val()).val() === auth.uid))",
             ".validate": "newData.hasChildren(['ownerUid', 'text', 'ts']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 80"
           }
         },
         "names": {
           ".read": "auth != null",
           "$key": {
-            ".write": "auth != null && !data.exists() && newData.val() === auth.uid",
+            ".write": "auth != null && newData.val() === auth.uid",
             ".validate": "newData.isString()"
           }
+        },
+        "hosts": {
+          ".read": "auth != null",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && newData.val() === true && (root.child('rooms').child($room).child('meta').child('hostUid').val() === auth.uid || (root.child('rooms').child($room).child('hostClaims').child($uid).exists() && root.child('rooms').child($room).child('hostCode').exists() && root.child('rooms').child($room).child('hostClaims').child($uid).val() === root.child('rooms').child($room).child('hostCode').val()))",
+            ".validate": "newData.isBoolean()"
+          }
+        },
+        "hostClaims": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.isString() && newData.val().length <= 32"
+          }
+        },
+        "hostCode": {
+          ".read": "auth != null && root.child('rooms').child($room).child('hosts').child(auth.uid).val() === true",
+          ".write": "auth != null && !data.exists() && root.child('rooms').child($room).child('meta').child('hostUid').val() === auth.uid",
+          ".validate": "newData.isString() && newData.val().length >= 6 && newData.val().length <= 32"
         }
       }
     }

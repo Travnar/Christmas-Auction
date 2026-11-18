@@ -2,7 +2,8 @@
   'use strict';
   var X = window.Xmas, el = X.el;
   var S = null, uid = null, room = '';
-  var state = { players: {}, gifts: {}, ideas: {}, hostUid: '' };
+  var pid = '';   // this player's id: their name key. The database maps it to whichever device is logged in as them.
+  var state = { players: {}, gifts: {}, ideas: {}, hosts: {}, names: {} };
   var subscribed = false;
   var annSeen = null;   // timestamp of the newest announcement already seen
 
@@ -43,9 +44,12 @@
     $('nameIn').value = X.ls.get('xmas-play-name') || '';
     if (r) {
       // The room's host gets a way back to the control room.
-      S.get('rooms/' + r + '/meta').then(function (m) { if (m && m.hostUid === uid) $('hostBack').hidden = false; }).catch(function () {});
-      return S.get('rooms/' + r + '/players/' + uid).then(function (p) {
-        if (p && p.name) start(r, p.name);
+      S.get('rooms/' + r + '/hosts/' + uid).then(function (yes) { if (yes === true) $('hostBack').hidden = false; }).catch(function () {});
+      var key = X.nameKey(X.ls.get('xmas-play-name') || '');
+      if (!key) return;
+      return S.get('rooms/' + r + '/names/' + key).then(function (owner) {
+        if (owner !== uid) return;
+        return S.get('rooms/' + r + '/players/' + key).then(function (p) { if (p && p.name) start(r, p.name); });
       });
     }
   }).catch(fatal);
@@ -57,21 +61,39 @@
     var name = $('nameIn').value.trim().slice(0, 24), code = X.cleanCode($('roomIn').value);
     joinErr('');
     if (!name || !code) { joinErr('Enter your name and the room code.'); return; }
+    var key = X.nameKey(name);
+    if (!key) { joinErr('Enter a name.'); return; }
     S.get('rooms/' + code + '/meta').then(function (meta) {
       if (!meta) { joinErr('No party found with that code.'); return; }
-      return S.get('rooms/' + code + '/players/' + uid).then(function (p) {
-        if (p && p.name) { start(code, p.name); return; }   // this browser already joined: just resume
-        // A name is unique within a room. Claim it first (the database refuses a second claim), then join.
-        var key = X.nameKey(name), taken = 'The name “' + name + '” is already taken in this room. Pick a different one.';
-        if (!key) { joinErr('Enter a name.'); return; }
-        return S.get('rooms/' + code + '/names/' + key).then(function (owner) {
-          if (owner && owner !== uid) { joinErr(taken); return; }
-          return S.set('rooms/' + code + '/names/' + key, uid).catch(function () { throw new Error(taken); }).then(function () {
-            return S.set('rooms/' + code + '/players/' + uid, { name: name, nameKey: key, balance: meta.startMoney || 200, joined: Date.now() });
-          }).then(function () { start(code, name); });
+
+      // New player: claim the name, then create the player.
+      function create() {
+        return S.set('rooms/' + code + '/names/' + key, uid).then(function () {
+          return S.set('rooms/' + code + '/players/' + key, { name: name, balance: meta.startMoney || 200, joined: Date.now() });
+        }).then(function () { start(code, name); });
+      }
+      // Existing player (this device now owns the name): open their record, or rebuild it if it is missing.
+      function open() {
+        return S.get('rooms/' + code + '/players/' + key).then(function (p) {
+          if (p && p.name) { start(code, p.name); return; }
+          return create();
+        });
+      }
+
+      return S.get('rooms/' + code + '/names/' + key).then(function (owner) {
+        if (!owner) return create();
+        if (owner === uid) return open();
+        // The name belongs to someone already: this may be them coming back on a new device, or a different person.
+        return S.get('rooms/' + code + '/players/' + key).then(function (p) {
+          var who = (p && p.name) || name;
+          if (!window.confirm('A player named \u201c' + who + '\u201d is already in this room.\n\nLog in as ' + who + '? (They will be logged out on their other device.)\n\nChoose Cancel to pick a different name.')) {
+            joinErr('Pick a different name, or log in as ' + who + '.');
+            return;
+          }
+          return S.set('rooms/' + code + '/names/' + key, uid).then(open);
         });
       });
-    }).catch(function (err) { joinErr((err && err.message && /already taken/.test(err.message)) ? err.message : 'Could not join: ' + ((err && err.message) || err)); });
+    }).catch(function (err) { joinErr('Could not join: ' + ((err && err.message) || err)); });
   });
 
   /* ---------- game ---------- */
@@ -79,6 +101,7 @@
 
   function start(code, name) {
     room = code;
+    pid = X.nameKey(name);
     X.ls.set('xmas-play-room', code);
     X.ls.set('xmas-play-name', name);
     $('whoami').textContent = name;
@@ -89,19 +112,17 @@
     subscribed = true;
 
     S.get('rooms/' + room + '/meta').then(function (m) {
-      state.hostUid = (m && m.hostUid) || '';
       if (m && m.giftCap) {
         $('giftCap').textContent = '';
         $('giftCap').appendChild(el('strong', { text: 'Gift cap: ' + X.money(m.giftCap) }));
         $('giftCap').appendChild(document.createTextNode(' Bring any mix of gifts that adds up to this in total.'));
         $('giftCap').hidden = false;
       }
-      if (state.hostUid === uid) $('hostBack').hidden = false;
       renderGifts();
     }).catch(function () {});
     sub('players', function (v) {
       state.players = v || {};
-      if (!state.players[uid] && !$('game').hidden) {
+      if (!state.players[pid] && !$('game').hidden) {
         // The host removed this player: back to the join form.
         $('game').hidden = true; $('joinBox').hidden = false;
         joinErr('The host removed you from this room.');
@@ -109,14 +130,25 @@
       }
       renderWallet(); renderGifts();
     });
+    sub('names', function (v) {
+      state.names = v || {};
+      if (state.names[pid] && state.names[pid] !== uid && !$('game').hidden) {
+        // Someone logged in as this player from another device.
+        $('game').hidden = true; $('joinBox').hidden = false;
+        joinErr('You were logged in from another device. Enter your name to log back in.');
+        return;
+      }
+      renderGifts();
+    });
     sub('gifts', function (v) { state.gifts = v || {}; renderGifts(); });
+    sub('hosts', function (v) { state.hosts = v || {}; $('hostBack').hidden = state.hosts[uid] !== true; renderGifts(); });
     sub('ideas', function (v) { state.ideas = v || {}; renderIdeas(); });
     sub('announce/all', renderAnnouncements);
   }
 
-  function myBal() { var p = state.players[uid]; return p ? p.balance : 0; }
+  function myBal() { var p = state.players[pid]; return p ? p.balance : 0; }
   function giftFrom(g) {
-    if (g.ownerUid === state.hostUid) return 'Host';
+    if (state.hosts[state.names[g.ownerUid]] === true) return 'Host';
     return state.players[g.ownerUid] ? state.players[g.ownerUid].name : 'a guest';
   }
 
@@ -140,7 +172,7 @@
     giftMsg('');
     var hidden = $('giftHidden').checked, text = $('giftDesc').value.trim().slice(0, 60);
     if (!hidden && !text) return giftMsg('Describe the gift, or tick Hidden.');
-    var gift = { ownerUid: uid, hidden: hidden, status: 'pool', ts: Date.now() };
+    var gift = { ownerUid: pid, hidden: hidden, status: 'pool', ts: Date.now() };
     if (!hidden) gift.desc = text;
     S.push('rooms/' + room + '/gifts', gift).then(function () {
       $('giftDesc').value = '';
@@ -159,7 +191,7 @@
     $('poolSummary').textContent = String(keys.length);
     if (!keys.length) box.appendChild(el('p', { class: 'small', text: 'No gifts added yet. Add yours above.' }));
     keys.forEach(function (k) {
-      var g = state.gifts[k], mine = g.ownerUid === uid;
+      var g = state.gifts[k], mine = g.ownerUid === pid;
       var status = 'From ' + giftFrom(g) + (g.status === 'up' ? ' · Up for bid now!' : g.status === 'sold' ? ' · Sold' : '');
       var title = [el('strong', { text: g.hidden ? 'Mystery gift' : g.desc })];
       if (mine) title.push(' ', el('span', { class: 'pill', text: 'Yours' }));
@@ -181,7 +213,7 @@
     ideaMsg('');
     var text = $('ideaText').value.trim().slice(0, 80);
     if (!text) return ideaMsg('Type an idea first.');
-    S.push('rooms/' + room + '/ideas', { ownerUid: uid, text: text, ts: Date.now() }).then(function () {
+    S.push('rooms/' + room + '/ideas', { ownerUid: pid, text: text, ts: Date.now() }).then(function () {
       $('ideaText').value = '';
       $('ideaText').placeholder = 'e.g. ' + pick(GIFT_IDEAS);
       ideaMsg('Added!', true);
@@ -194,7 +226,7 @@
     $('ideaCount').textContent = String(keys.length);
     if (!keys.length) box.appendChild(el('p', { class: 'small', text: 'No ideas yet. Add the first one above.' }));
     keys.forEach(function (k) {
-      var d = state.ideas[k], mine = d.ownerUid === uid;
+      var d = state.ideas[k], mine = d.ownerUid === pid;
       var title = [el('strong', { text: d.text })];
       if (mine) title.push(' ', el('span', { class: 'pill', text: 'Yours' }));
       var act = mine ? el('button', { type: 'button', class: 'ghost', text: 'Remove', onclick: function () {

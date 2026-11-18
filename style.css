@@ -160,6 +160,8 @@ a.btn:active{border-style:inset}
 .stat-label{font-weight:bold;text-transform:uppercase;letter-spacing:.08em;font-size:.85rem;margin-bottom:4px}
 .stat .roomcode{display:flex;align-items:center;justify-content:center;flex:1;min-height:1.6em;font-size:2.2rem;letter-spacing:.12em;padding:4px 10px;box-sizing:border-box;width:100%}
 td.right{text-align:right}
+.mono{font-family:"Courier New",monospace;letter-spacing:.12em}
+.hostcode-row button{padding:2px 10px;font-size:.85rem}
 /* top navigation buttons on the host and player pages */
 .topnav{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:8px 0}
 .topnav a.btn{font-size:1.3rem;padding:12px 34px;min-width:7.5em;text-align:center;margin:0}
