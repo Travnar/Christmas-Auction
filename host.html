@@ -6,7 +6,7 @@
 <title>Host: Christmas Auction</title>
 <meta name="robots" content="noindex">
 <script src="theme.js?v=5"></script>
-<link rel="stylesheet" href="style.css?v=25">
+<link rel="stylesheet" href="style.css?v=26">
 </head>
 <body data-calm>
 <canvas id="snow" aria-hidden="true"></canvas>
@@ -115,6 +115,19 @@
         <p class="trivia-a" id="triviaA"></p>
         <p><button id="newBtn" type="button">New question</button></p>
       </div>
+
+      <h3>Caroling</h3>
+      <div class="card center">
+        <p class="small">Go around the room. Each person says the highlighted word. The first to get it wrong, or not know it, loses.</p>
+        <div class="formrow carol-pick" id="carolPick"></div>
+        <div class="carol-lyrics" id="carolLyrics" role="status" aria-live="polite"></div>
+        <p class="small" id="carolStatus"></p>
+        <p class="small" id="carolCredit"></p>
+        <p>
+          <button id="carolNext" type="button">Start</button>
+          <button id="carolRestart" type="button" class="alt">Restart</button>
+        </p>
+      </div>
     </section>
 
 
@@ -134,6 +147,6 @@
 <script src="firebase-config.js?v=2"></script>
 <script src="app.js?v=4"></script>
 <script src="decor.js?v=14"></script>
-<script src="host.js?v=20"></script>
+<script src="host.js?v=24"></script>
 </body>
 </html>

@@ -326,6 +326,108 @@
     });
   })();
 
+  /* ---------- games: Caroling ----------
+   * Lyrics are shown with one word highlighted. "Next" moves to the following word;
+   * the host goes around the room and whoever misses the word loses. */
+  (function () {
+    var CAROLS = [
+      ['Jingle Bells', [
+        'Dashing through the snow\nIn a one-horse open sleigh\nO\'er the fields we go\nLaughing all the way\nBells on bobtail ring\nMaking spirits bright\nWhat fun it is to ride and sing\nA sleighing song tonight',
+        'Jingle bells, jingle bells\nJingle all the way\nOh, what fun it is to ride\nIn a one-horse open sleigh\nJingle bells, jingle bells\nJingle all the way\nOh, what fun it is to ride\nIn a one-horse open sleigh'
+      ]],
+      ['We Wish You a Merry Christmas', [
+        'We wish you a merry Christmas\nWe wish you a merry Christmas\nWe wish you a merry Christmas\nAnd a happy new year',
+        'Good tidings we bring\nTo you and your kin\nGood tidings for Christmas\nAnd a happy new year',
+        'Now bring us some figgy pudding\nNow bring us some figgy pudding\nNow bring us some figgy pudding\nAnd bring it right here',
+        'We won\'t go until we get some\nWe won\'t go until we get some\nWe won\'t go until we get some\nSo bring it right here'
+      ]],
+      ['Deck the Halls', [
+        'Deck the halls with boughs of holly\nFa la la la la, la la la la\nTis the season to be jolly\nFa la la la la, la la la la',
+        'Don we now our gay apparel\nFa la la, la la la, la la la\nTroll the ancient Yuletide carol\nFa la la la la, la la la la',
+        'See the blazing Yule before us\nFa la la la la, la la la la\nStrike the harp and join the chorus\nFa la la la la, la la la la',
+        'Follow me in merry measure\nFa la la, la la la, la la la\nWhile I tell of Yuletide treasure\nFa la la la la, la la la la'
+      ]]
+    ];
+
+    // Instrumental for each song above (same order). Pressing Start plays it while the host runs the game.
+    var MUSIC = [
+      { src: 'media/audio/jingle_bells.mp3', credit: '' },
+      { src: 'media/audio/we_wish_you_a_merry_christmas.ogg', credit: 'Music: Kevin MacLeod, via Wikimedia Commons (public domain)' },
+      { src: 'media/audio/deck_the_halls.ogg', credit: 'Music: United States Air Force Band, via Wikimedia Commons (public domain)' }
+    ];
+    var audio = null;
+
+    function stopMusic() { if (audio) { audio.pause(); audio = null; } }
+    function playMusic(i) {
+      stopMusic();
+      var b = document.querySelector('.musicbtn');   // pause the page's background music first
+      if (b && b.getAttribute('aria-label') === 'Stop music') b.click();
+      var a = new Audio(MUSIC[i].src);
+      a.loop = true; a.volume = 1;
+      a.addEventListener('error', function () {
+        if (audio === a) { audio = null; $('carolCredit').textContent = 'No music file for this song yet, so it will play without music.'; }
+      });
+      audio = a;
+      a.play().catch(function (e) {
+        if (audio === a) { audio = null; $('carolCredit').textContent = 'Could not play the music: ' + ((e && e.message) || e); }
+      });
+    }
+
+    var cur = 0, pos = -1, words = [];   // pos -1 = not started
+    var pick = $('carolPick'), box = $('carolLyrics');
+
+    function load(i) {
+      stopMusic();
+      cur = i; pos = -1; words = [];
+      $('carolCredit').textContent = MUSIC[i].credit;
+      box.textContent = '';
+      CAROLS[i][1].forEach(function (stanza) {
+        var st = el('div', { class: 'carol-stanza' });
+        stanza.split('\n').forEach(function (line) {
+          var ln = el('div', { class: 'carol-line' });
+          line.split(' ').forEach(function (w, k) {
+            var s = el('span', { class: 'carol-word', text: w });
+            words.push(s); ln.appendChild(s);
+            if (k < line.split(' ').length - 1) ln.appendChild(document.createTextNode(' '));
+          });
+          st.appendChild(ln);
+        });
+        box.appendChild(st);
+      });
+      $('carolNext').textContent = 'Start';
+      $('carolNext').disabled = false;
+      $('carolStatus').textContent = 'Pick the first player, then press Start.';
+      Array.prototype.forEach.call(pick.children, function (b, k) { b.className = k === i ? '' : 'alt'; });
+    }
+
+    function show() {
+      words.forEach(function (w, k) {
+        w.className = 'carol-word' + (k === pos ? ' now' : k < pos ? ' done' : '');
+      });
+      if (pos >= 0 && words[pos]) words[pos].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+
+    $('carolNext').addEventListener('click', function () {
+      if (pos >= words.length - 1) return;
+      if (pos === -1) playMusic(cur);   // Start: the song begins with the first word
+      pos++; show();
+      $('carolNext').textContent = 'Next word';
+      if (pos === words.length - 1) {
+        $('carolNext').disabled = true;
+        stopMusic();
+        $('carolStatus').textContent = 'That\'s the last word. Everybody survived!';
+      } else {
+        $('carolStatus').textContent = 'Word ' + (pos + 1) + ' of ' + words.length;
+      }
+    });
+    $('carolRestart').addEventListener('click', function () { load(cur); });
+
+    CAROLS.forEach(function (c, i) {
+      pick.appendChild(el('button', { type: 'button', text: c[0], onclick: function () { load(i); } }));
+    });
+    load(0);
+  })();
+
   /* ---------- end ---------- */
   $('endBtn').addEventListener('click', function () {
     if (!window.confirm('Delete room ' + room + ' and everything in it? This cannot be undone.')) return;
